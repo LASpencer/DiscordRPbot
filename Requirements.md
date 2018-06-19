@@ -8,16 +8,17 @@ Rolls 4 times and returns sum.
 
 ## Aspects
 Aspects are tied to characters, can be **invoked** and **compelled**
+There can also be situation(temporary) and global aspects.
 
 ## Fate Points
 Fate points are the currency for game influence. Needs to be tracked. 
 - Refresh: when new session starts, if the player's FP < Refresh, set FP to Refresh
 - Players gains FP for accepting compels, and can spend FP invoking aspects
 
-## Compels
+### Compels
 The GM may compel players, if compel is accepted by player add 1FP to the player's FP balance
 
-## Invokes
+### Invokes
 Players may invoke aspects(their own or others) by spending FP. Take 1FP from player's balances; return an error if player has insufficient FP.
 
 ## Stress 
