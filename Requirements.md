@@ -20,6 +20,13 @@ The GM may compel players, if compel is accepted by player add 1FP to the player
 ## Invokes
 Players may invoke aspects(their own or others) by spending FP. Take 1FP from player's balances; return an error if player has insufficient FP.
 
+## Stress 
+Track stress for each character/game entity. 
+Stress boxes: 1st box absorbs 1 stress, 2nd box absorbs 2 stress, etc. 
+### Consequences 
+Consequences are invokable **Aspects**, absorbs 2, 4 and 6 stress.
+Mild(2) is removed at the end of **Scenes**, Moderate and Severe need to be treated.
+
 ## Refresh command
 Starts a new session, restoring everyone's fate points, and situational aspects
 
