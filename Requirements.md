@@ -29,7 +29,7 @@ Consequences are invokable **Aspects**, absorbs 2, 4 and 6 stress.
 Mild(2) is removed at the end of **Scenes**, Moderate and Severe need to be treated.
 
 ## Refresh command
-Starts a new session, restoring everyone's fate points, and situational aspects
+Starts a new session, restoring everyone's fate points, and resets situational aspects
 
 # Additional
 
