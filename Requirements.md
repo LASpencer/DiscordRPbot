@@ -46,6 +46,10 @@ A Dnd Bot, has essentially all the functionality required, just not the specific
 ## https://www.youtube.com/watch?v=_0LXIvLDhBM
 Tutorial
 
+## http://discordpy.readthedocs.io/en/latest/api.html
+The API reference for python
+
+
 # Installation
 
 Need to install dependency for discord 
