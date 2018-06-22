@@ -14,9 +14,28 @@ Represents a Character in the Fate SRD
 
 
 class Character:
-    def __init__(self):
+    def __init__(self, refresh_rate = 3):
         self.bars = {}  # address bars by name
         self.aspects = AspectContainer()
+        self.fate = 0
+        self.refresh_rate = refresh_rate
+
+    def get_fate(self):
+        return self.fate
+
+    def change_fate(self,change):
+        """
+        Change the fate points
+        TODO negotiate maximum, minimum
+        :param change: the amount to change by
+        """
+        self.fate += change
+
+    def refresh_fate(self):
+        """
+        Returns fate to a minimum, otherwise doesn't change
+        """
+        self.fate = self.fate if self.fate >= self.refresh_rate else self.refresh_rate
 
     def get_bar(self, name):
         '''
