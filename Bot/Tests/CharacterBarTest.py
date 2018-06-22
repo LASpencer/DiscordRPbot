@@ -3,7 +3,7 @@ from Character import *
 from Bar import *
 class CharacterBarTest(unittest.TestCase):
     def setUp(self):
-        self.c = Character()
+        self.c = Character("bob")
         self.bar = Bar("Test")
         self.bar.add_box(Box(1))
         self.bar.add_box(Box(2))

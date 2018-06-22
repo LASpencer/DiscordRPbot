@@ -15,7 +15,8 @@ Represents a Character in the Fate SRD
 
 
 class Character:
-    def __init__(self, refresh_rate = 3):
+    def __init__(self,name, refresh_rate=3):
+        self.name = name
         self.bars = {}  # address bars by name
         self.aspects = AspectContainer()
         self.skills = SkillContainer()
@@ -41,7 +42,7 @@ class Character:
 
     def get_bar(self, name):
         '''
-        Gets a bar,
+        Gets a bar
         :param name: name of bar, non-case-sensitive
         :return: Bar, or None if it does not exist
         '''
@@ -111,5 +112,47 @@ class Character:
         return str(self.aspects)
 
 
+    def add_skill(self,level,name):
+        """
+        Deletegate to skills
+        :param level: the level of the skill
+        :param name: the name of the skill
+        :return: True if added
+        """
+        return self.skills.add(level,name)
 
+    def get_skill_level(self,name):
+        """
+        Delegate to skills
+        :param name: the name of the skill
+        :return: the level of the skill, none otherwise
+        """
+        return self.skills.get_level(name)
+
+    def remove_skill(self,name):
+        """
+        Delegate to skills
+        :param name: the name of the skill
+        :return: the skill that is removed, None otherwise
+        """
+        return self.skills.remove(name)
+
+    def get_name(self):
+        return self.name
+
+    def __str__(self):
+        output = ""
+        output += self.name
+        # add aspects
+        output += "\nAspects: "
+        output += str(self.aspects)
+        # add skills
+        output += "\nSkills: "
+        output += str(self.skills)
+
+        for bar in self.bars:
+            output += "\n"
+            output += str(self.bars[bar])
+
+        return output
 

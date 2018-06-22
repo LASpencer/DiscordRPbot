@@ -4,7 +4,7 @@ from Aspect import Aspect
 
 class CharacterAspectTest(unittest.TestCase):
     def setUp(self):
-        self.c = Character()
+        self.c = Character("bob")
 
     def test_add(self):
         self.assertTrue(self.c.add_aspect("On Fire"), " Did not return correct on successful add")

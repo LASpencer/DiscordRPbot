@@ -4,7 +4,7 @@ from Character import Character
 
 class CharacterFateTest(unittest.TestCase):
     def setUp(self):
-        self.c = Character(refresh_rate=3)
+        self.c = Character("bob",refresh_rate=3)
 
     def test_initialise(self):
         self.assertEqual(0,self.c.get_fate(),"Did not initialise at 0 fate")

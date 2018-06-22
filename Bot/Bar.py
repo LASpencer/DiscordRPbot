@@ -38,7 +38,7 @@ class Bar:
         output = ""
         output += self.name
         for box in self.boxes:
-            output += "\n" + str(box)
+            output += " " + str(box)
         return output
 
 
@@ -64,6 +64,8 @@ class Box:
         self.used = False
 
     def __str__(self):
-        return "Size: " + str(self.size) + " Used :" + ("Y" if self.used else "N")
-
+        if self.used:
+            return "\033[0;31m[%d]\033[0m" % self.size
+        else:
+            return "\033[0;32m[%d]\033[0m" % self.size
 
