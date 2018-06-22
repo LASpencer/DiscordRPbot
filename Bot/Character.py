@@ -7,6 +7,7 @@ Date : 21/06/2018
 """
 from Bar import *
 from Aspect import *
+from Skill import *
 
 """
 Represents a Character in the Fate SRD
@@ -17,6 +18,7 @@ class Character:
     def __init__(self, refresh_rate = 3):
         self.bars = {}  # address bars by name
         self.aspects = AspectContainer()
+        self.skills = SkillContainer()
         self.fate = 0
         self.refresh_rate = refresh_rate
 
@@ -107,5 +109,7 @@ class Character:
 
     def display_aspect(self):
         return str(self.aspects)
+
+
 
 
