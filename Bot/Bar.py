@@ -7,21 +7,32 @@ Date : 21/06/2018
 """
 
 
-"""
-A stress bar in the Fate SRD
-box indexes start at 1
-"""
+
 class Bar:
+    """
+    A stress bar in the Fate SRD
+    box indexes start at 1
+    """
     def __init__(self,name):
         self.name = name
         self.boxes = []
 
     def add_box(self,box):
+        '''
+        Adds a new box to the bar
+        :param box: a box, must be of Box type
+        '''
         assert isinstance(box,Box)
         self.boxes.append(box)
 
     def __getitem__(self, index):
-        return self.boxes[index-1] # we start our indexing at 1.
+        '''
+        retrieves an item
+        we start our indexing at 1.
+        :param index: index, must be integer
+        :return: the Box at the index
+        '''
+        return self.boxes[index-1]
 
     def __str__(self):
         output = ""
@@ -31,19 +42,25 @@ class Bar:
         return output
 
 
-"""
-A bar consists of boxes
-"""
-class Box:
 
+class Box:
+    """
+    A bar consists of boxes
+    """
     def __init__(self,size):
         self.size = size
         self.used = False
 
     def spend(self):
+        '''
+        toggle a box as used
+        '''
         self.used = True
 
     def refresh(self):
+        '''
+        Toggle a box as un-used
+        '''
         self.used = False
 
     def __str__(self):

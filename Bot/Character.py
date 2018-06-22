@@ -19,36 +19,74 @@ class Character:
         self.aspects = AspectContainer()
 
     def get_bar(self, name):
-        return self.bars[name]
+        '''
+        Gets a bar,
+        :param name: name of bar, non-case-sensitive
+        :return: Bar, or None if it does not exist
+        '''
+        try:
+            return self.bars[name.lower()]
+        except KeyError:
+            return None
 
     def add_bar(self, bar):
+        '''
+        Adds a bar, with a non-case-sensitive name
+        :param bar: the bar to add
+        '''
         assert isinstance(bar,Bar), "not adding bar"
-        self.bars[bar.name] = bar
+        self.bars[bar.name.lower()] = bar
 
-    '''
-    :param bar: a string related to the box
-    :param box: a index of which bar to use up
-    '''
+    def remove_bar(self,text):
+        """
+        Remove a bar from a character
+        It requires that we are removing a bar object
+        This is non-case-sensitive
+        :param text: the name of bar to remove
+        :return: the Bar removed, None otherwise
+        """
+        return self.bars.pop(text.lower(), None)
+
     def spend_box(self, bar, box):
-        self.bars[bar][box].spend()
+        """
+        spend a box of a bar
+        This currently depends on how the bar is implemented
+        (bar currently assumed implemented as array)
+        :param bar: the name of the bar non-case-sensitive
+        :param box: the index of the box
+        """
+        self.bars[bar.lower()][box].spend()
 
-    '''
-    :param bar: a string related to the box
-    :param box: a index of which bar to use up
-    '''
     def refresh_box(self, bar, box):
-        self.bars[bar][box].refresh()
+        """
+        refresh a box of a bar so it can be used again
+        This currently depends on how the bar is implemented
+        (bar currently assumed implemented as array)
+        :param bar: the name of the bar non-case-sensitive
+        :param box: the index of the box
+        """
+        self.bars[bar.lower()][box].refresh()
 
     def add_aspect(self,text):
-        return self.aspects.add(Aspect(text))
+        """
+        Delegate function
+        Adds an aspect to the character
+        this is non-case sensitive
+        :param text: the aspect to add
+        :return: true if added, false if not
+        """
+        return self.aspects.add(text)
 
-    '''
-    if aspect is present, return true
-    if false, return false
-    '''
     def remove_aspect(self,text):
-        if self.aspects.remove(Aspect(text)) is None:
-            return False
-        else:
-            return True
+        """
+        Remove an aspect
+        This is non-case sensitive
+        :param text: the aspect to remove
+        :return: True if removed, false if not removed (either not present or unsuccessful)
+        """
+        return self.aspects.remove(text) is not None
+
+    def display_aspect(self):
+        return str(self.aspects)
+
 
