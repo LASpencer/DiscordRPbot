@@ -10,45 +10,65 @@ from discord.ext.commands import Bot
 from discord.ext import commands
 import asyncio
 import time
+import random
 
 Client = discord.Client()
-client = commands.Bot(command_prefix= "!")
+bot = commands.Bot(command_prefix="!")
 
 prefix = "!"
 
-memberRole = None
+playerRole = None
 GMRole = None
 
-@client.event
+@bot.event
 async def on_ready():
     # will print to python console
     print("Bot is ready!")
 
-@client.event
+@bot.command(pass_context=True)
+async def hello(context):
+    await bot.say("<@%s> hello" % context.message.author.id)
+
+@bot.command(pass_context=False)
+async def cookie():
+    await bot.say(":cookie:")
+
+@bot.command(pass_context=False)
+async def roll():
+    [d1,d2,d3,d4,t] = fudgeRoll()
+    await bot.say("%d + %d + %d + %d = %d" % (d1,d2,d3,d4,t))
+
+def fudgeRoll():
+    d1 = random.randrange(-1, 2, 1)
+    d2 = random.randrange(-1, 2, 1)
+    d3 = random.randrange(-1, 2, 1)
+    d4 = random.randrange(-1, 2, 1)
+
+    return [d1,d2,d3,d4, d1+d2+d3+d4]
+
+@bot.command(pass_context=True)
+async def assign(context,role,id):
+    if context.message.server.owner == context.message.author:
+        if role == "player":
+            global playerRole
+            playerRole = id[3:len(id) - 1]
+            await bot.say("player role set")
+        elif role == "gm":
+            global GMRole
+            GMRole = id[3:len(id) - 1]
+            await bot.say("gm role set")
+    else:
+        await bot.say("Not Owner")
+
+@bot.event
 async def on_message(message):
-    global memberRole
+    global playerRole
     global GMRole
     # message.channel refers to the channel the message came from
-    # await is used, as so it will wait until the client is able to send the message, before continuing.
+    # await is used, as so it will wait until the bot is able to send the message, before continuing.
     if message.content.startswith(prefix):
         content = message.content[len(prefix):].lower() # remove prefix
         userID = message.author
-        if content == "hello":
-            await client.send_message(message.channel, "<@%s> hello" % userID)
-        if content == "cookie":
-            await client.send_message(message.channel, ":cookie:")
-
-        # make user-specific command
-        if content == "hello admin":
-            if userID == "1234123":
-                await client.send_message(message.channel, "<@%s> hello" % userID)
-            else:
-                await client.send_message(message.channel, "No admin access")
-
-        # make role-specific commands
-        if content == "roles":
-            for role in message.author.roles:
-                print(role)
 
         # admin commands
         if content.startswith("assign"):
@@ -62,12 +82,12 @@ async def on_message(message):
                 roleID = args[1][3:len(args[1])-1]
                 if args[2] == "member":
 
-                    memberRole = roleID
+                    playerRole = roleID
                 if args[2] == "gm":
 
                     GMRole = roleID
             else:
-                await client.send_message(message.channel, "Not Owner")
+                await bot.send_message(message.channel, "Not Owner")
 
         # TODO there should be a nicer way to organise code
         # code should run, 'content' then check for authentication, but this generates
@@ -75,22 +95,32 @@ async def on_message(message):
         if content == "roll":
             [member,msg] = is_member((role.id for role in message.author.roles))
             if not member:
-                await client.send_message(message.channel, msg)
+                await bot.send_message(message.channel, msg)
             else:
-                await client.send_message(message.channel, "Dice Roll")
+                await bot.send_message(message.channel, "Dice Roll")
 
 
         if content == "start game":
             [GM, msg] = is_GM((role.id for role in message.author.roles))
             if not GM:
-                await client.send_message(message.channel, msg)
+                await bot.send_message(message.channel, msg)
             else:
-                await client.send_message(message.channel, "Start Game")
+                await bot.send_message(message.channel, "Start Game")
+
+    await bot.process_commands(message)
+
+async def utility(message,userID):
+    if message == "hello":
+        await bot.send_message(message.channel, "<@%s> hello" % userID)
+    if message == "cookie":
+        await bot.send_message(message.channel, ":cookie:")
+
+
 
 def is_member(roles):
-    if memberRole is None:
+    if playerRole is None:
         return [False, "No Member Role set"]
-    elif memberRole in (roles):
+    elif playerRole in (roles):
         return [True, "is a member"]
     else:
         return [False, "Not a Member"]
@@ -104,5 +134,5 @@ def is_GM(roles):
         return [False, "Not a GM"]
 
 
-client.run("NDU4NTcwNTQ0OTkzMDA5Njgx.DgpuXg.IteIGqcCGctdKQCEUvoEExXGbjc")
+bot.run("NDU4NTcwNTQ0OTkzMDA5Njgx.DgpuXg.IteIGqcCGctdKQCEUvoEExXGbjc")
 
