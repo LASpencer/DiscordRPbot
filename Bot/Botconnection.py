@@ -116,5 +116,12 @@ def is_gm(roles):
         return False
 
 
-bot.run("NDU4NTcwNTQ0OTkzMDA5Njgx.DgpuXg.IteIGqcCGctdKQCEUvoEExXGbjc")
+"""
+Read token from file, which is git-ignored to prevent stolen bot
+file should just have token in it.
+"""
+with open("token.txt","r") as file:
+    token = file.read()
+
+bot.run(token)
 
