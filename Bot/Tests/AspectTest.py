@@ -3,7 +3,7 @@ from Aspect import *
 
 # Not testing aspect, as it is a pure data class
 
-class MyTestCase(unittest.TestCase):
+class AspectContainerTest(unittest.TestCase):
 
     def setUp(self):
         self.container = AspectContainer()
@@ -32,6 +32,15 @@ class MyTestCase(unittest.TestCase):
         self.container.remove("on fire")
         self.assertEqual("", str(self.container), "Aspect not properly removed")
 
+    def test_multiple_aspects(self):
+        aspects = ["on fire", "dying", "bleeding", "chronic fatigue", "glowing"]
+
+        comma = 0
+        for aspect in aspects:
+            self.assertTrue(self.container.add(aspect), "Did not return correct on successful add")
+            self.assertTrue(aspect in str(self.container), "Did not add aspects into list")
+            self.assertEqual(comma, str(self.container).count(','), "Did not add commas correctly")
+            comma += 1
 
 if __name__ == '__main__':
     unittest.main()

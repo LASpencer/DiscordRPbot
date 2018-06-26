@@ -14,10 +14,11 @@ class AspectContainer:
         self.aspects = []
 
     def __str__(self):
+        #TODO make spaces between each aspect
         output = ""
         for aspect in self.aspects:
-            output += str(aspect) + " "
-        output = output[0:len(output)-1] # remove the last space
+            output += str(aspect) + ", "
+        output = output[0:len(output)-2] # remove the last space and comma
         return output
 
     def add(self,text):

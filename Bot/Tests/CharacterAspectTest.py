@@ -30,9 +30,12 @@ class CharacterAspectTest(unittest.TestCase):
     def test_multiple_aspects(self):
         aspects = ["on fire", "dying", "bleeding", "chronic fatigue", "glowing"]
 
+        comma = 0
         for aspect in aspects:
             self.assertTrue(self.c.add_aspect(aspect), "Did not return correct on successful add")
             self.assertTrue(aspect in self.c.display_aspect(), "Did not add aspects into list")
+            self.assertEqual(comma, self.c.display_aspect().count(','), "Did not add commas correctly")
+            comma += 1
 
 
 if __name__ == '__main__':

@@ -111,7 +111,6 @@ class Character:
     def display_aspect(self):
         return str(self.aspects)
 
-
     def add_skill(self,level,name):
         """
         Deletegate to skills

@@ -28,6 +28,12 @@ async def on_ready():
     # will print to python console
     print("Bot is ready!")
 
+
+"""
+####################################################################
+Utility Functions
+####################################################################
+"""
 @bot.command(pass_context=True)
 async def hello(context):
     await bot.say("<@%s> hello" % context.message.author.id)
@@ -49,6 +55,12 @@ def fudgeRoll():
 
     return [d1,d2,d3,d4, d1+d2+d3+d4]
 
+
+"""
+####################################################################
+Discord Set up
+####################################################################
+"""
 @bot.command(pass_context=True)
 async def assign(context,role_arg,id):
     if context.message.server.owner == context.message.author:
@@ -64,6 +76,12 @@ async def assign(context,role_arg,id):
     else:
         await bot.say("Not Owner")
 
+
+"""
+####################################################################
+Game Set up
+####################################################################
+"""
 @bot.command(pass_context=True)
 async def game(context,arg):
     roles = list(role.id for role in context.message.author.roles) # get role ids
@@ -82,20 +100,152 @@ async def join(context):
     roles = list(role.id for role in context.message.author.roles) # get role ids
     if is_gm(roles) or is_player(roles):
         global game_object
-        game_object.add_player(context.message.author.id)
-        await bot.say("Joined game")
+        if game_object.add_player(context.message.author.id):
+            await bot.say("Joined game")
 
+@bot.command(pass_context=True)
+async def leave(context):
+    roles = list(role.id for role in context.message.author.roles)  # get role ids
+    if is_gm(roles) or is_player(roles):
+        global game_object
+        if game_object.remove_player(context.message.author.id):
+            await bot.say("left game")
 
+@bot.command(pass_context=True)
+async def c(context,name,id=None):
+    roles = list(role.id for role in context.message.author.roles)  # get role ids
+    player = is_player(roles)
+    gm = is_gm(roles)
+
+    if not player and not gm:
+        return
+
+    if id is None and gm:
+        bot.say("No player")
+        return
+
+    if id is None and player:
+        game_id = context.message.author.id
+    else:
+        game_id = id[2:len(id) - 1] #TODO add some verification of id format.
+
+    game_object.new_character(name,game_id)
+    await bot.say("character added")
+
+"""
+####################################################################
+Game Utility
+####################################################################
+"""
+@bot.command(pass_context=True)
+async def info(context, id=None):
+
+    if id is None:
+        game_id = context.message.author.id
+    else:
+        game_id = id[2:len(id) - 1] #TODO add some verification of id format.
+
+    cha = game_object.get_character(game_id)
+    if cha is None:
+        await bot.say("no character")
+    else:
+        await bot.say(str(cha))
+
+"""
+####################################################################
+Game Play
+####################################################################
+"""
+
+@bot.command(pass_context=True)
+async def c_add(context, type : str,player_id: discord.Member = None, *text):
+    """
+    Handle adding of things to characters
+    :param context: context
+    :param type: what are we editing of a character
+    :param text: what is the text to go with it
+    :param player_id: mention
+    :return:
+    """
+    roles = list(role.id for role in context.message.author.roles)  # get role ids
+    player = is_player(roles)
+    gm = is_gm(roles)
+
+    if not player and not gm:
+        return
+
+    if gm:
+        if id is None:
+            print(id)
+            await bot.say("no player targeted")
+            return
+        else:
+            game_id = player_id.id
+    else:
+        game_id = context.message.author.id
+
+    cha = game_object.get_character(game_id)
+    if cha is None:
+        bot.say("no character")
+        return
+
+    #Type decoding
+    type_l = type.lower()
+    if type_l == "aspect":
+        for t in text:
+            cha.add_aspect(t)
+        pass
+    elif type_l == "bar":
+        cha.add_bar(text)
+        pass
+    elif type_l == "consequence" or type_l == "con":
+        pass
+
+@bot.command(pass_context=True)
+async def c_remove(context, type, *text, id= None):
+    """
+    Handle all the comment
+    :param context: context
+    :param type: what are we editing of a character
+    :param text: what is the text to go with it
+    :param id: optional id
+    :return:
+    """
+    roles = list(role.id for role in context.message.author.roles)  # get role ids
+    player = is_player(roles)
+    gm = is_gm(roles)
+
+    if not player and not gm:
+        return
+
+    if gm:
+        if id is None:
+            await bot.say("no player targeted")
+            return
+        else:
+            game_id = id[2:len(id) - 1]  # TODO add some verification of id format.
+    else:
+        game_id = context.message.author.id
+
+    cha = game_object.get_character(game_id)
+    if cha is None:
+        bot.say("no character")
+        return
+
+    #Type decoding
+    type_l = type.lower()
+    if type_l == "aspect":
+        for t in text:
+            cha.remove_aspect(t)
+        pass
+    elif type_l == "bar":
+        pass
+    elif type_l == "consequence" or type_l == "con":
+        pass
 
 @bot.event
 async def on_message(message):
     await bot.process_commands(message)
-
-async def utility(message,userID):
-    if message == "hello":
-        await bot.send_message(message.channel, "<@%s> hello" % userID)
-    if message == "cookie":
-        await bot.send_message(message.channel, ":cookie:")
 
 def is_player(roles):
     global playerRole

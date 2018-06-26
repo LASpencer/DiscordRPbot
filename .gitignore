@@ -1,3 +1,5 @@
 
 Bot/\.idea/
 Bot/token.txt
+
+Bot/__pycache__/
