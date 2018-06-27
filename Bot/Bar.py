@@ -65,7 +65,7 @@ class Box:
 
     def __str__(self):
         if self.used:
-            return "\033[0;31m[%d]\033[0m" % self.size
+            return "~~[%d]~~" % self.size
         else:
-            return "\033[0;32m[%d]\033[0m" % self.size
+            return "[%d]" % self.size
 

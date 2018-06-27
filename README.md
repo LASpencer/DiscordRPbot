@@ -30,16 +30,12 @@ starts a game, resets the game, or provides details. This is for gm use ONlY
 role can be one of "player" or "gm", and the @role requires a role to be mentioned
 This will set the permissions of the game
 
-## join
-join the currently running game
-
-## leave
-leave the currently running game
-
 ## info <@user>
 gives information of a person's character in game. the default @user is the message sender
 
-##
+## info_fate <@user>
+private messages the number of fate points. A player can only see their own, while a gm 
+can use the additional @user parameter to look at everyones
 
 ## c (name) <@user>
 create a new character of the name and assign it to you. the @user is optional and only usable by gm.
@@ -52,3 +48,12 @@ multiple attributes can be added at once
 ## c_remove <@user> (type) (a1) (a2) (a3)
 type can be of "aspect" "bar" "consequence". @user is only for gm purposes. 
 multiple attributes can be removed at once
+
+## bar (action) (bar) (box) <@user>
+action can be one of spend or refresh. s and r are short forms. The bar is the name while box is the index.
+The @user is for gm only.
+## fate (action) (amount) <@user>
+action can be spend or give. s and g are short forms. Only a player may spend their own points, 
+while a gm can give and spend, but need to specify user
+
+

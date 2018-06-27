@@ -1,6 +1,6 @@
 import unittest
 
-from BarFactory import BarFactory
+import BarFactory
 
 class BarFactoryTest(unittest.TestCase):
     def test_bar_default(self):

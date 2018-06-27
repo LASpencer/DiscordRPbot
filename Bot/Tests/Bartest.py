@@ -13,7 +13,7 @@ class BarTest(unittest.TestCase):
     def test_Bar_box(self):
         box = Box(2)
         self.b.add_box(box)
-        self.assertEqual("bar \033[0;32m[2]\033[0m",str(self.b), "Added box not properly appended to display")
+        self.assertEqual("bar [2]",str(self.b), "Added box not properly appended to display")
         self.assertEqual(self.b[0],box,"Box not properly added")
 
 
