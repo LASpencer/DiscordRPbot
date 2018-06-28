@@ -43,6 +43,7 @@ This is to allow the gm to help players set up
 
 ## aspect (action) <@user> (args)
 <@user> is only used for gm
+
 | Action | Short | argument list | desc |
 | ------ | ----- | ------------- | ---- |
 | add	 | a     | (a1) (a2) (a3)  | adds aspect to a character |
@@ -50,6 +51,7 @@ This is to allow the gm to help players set up
 
 ## skill (action) <@user> (name, level) (name, level)
 <@user> is only used for gm
+
 | Action | Short | argument list | desc |
 | ------ | ----- | ------------- | ---- |
 | add	 | a     | (skill) (level) (skill) (level)  | adds skill to a character |
@@ -57,6 +59,7 @@ This is to allow the gm to help players set up
 
 ## bar (action) <@user> (args)
 <@user> is only used for gm
+
 | Action | Short | argument list | desc |
 | ------ | ----- | ------------- | ---- |
 | add	 | a     | (b1) (b2)     | adds bar to a character |
@@ -67,6 +70,7 @@ This is to allow the gm to help players set up
 ## fate (action) (amount) <@user>
 <@user> is only used for gm
 A player may only spend their points, but only a gm can give.
+
 | Action | Short | desc |
 | ------ | ----- | ---- |
 | spend	 | s     |  adds fate to a character |
