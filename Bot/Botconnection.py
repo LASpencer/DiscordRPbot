@@ -151,123 +151,96 @@ Game Play
 ####################################################################
 """
 
-
 @bot.command(pass_context=True)
-async def c_add(context, type, player_id, *text):
+async def aspect(context, action, player_id, *text):
     """
-    Handle adding of things to characters
-    :param context: context
-    :param type: what are we editing of a character
-    :param player_id: potential mention
-    :param text: what is the text to go with it
-    :return:
+    Handles aspect addition and removal
+    :param context: context of message
+    :param action: one of [add, a] or [remove, r]
+    :param player_id: optional player id, for gm use only
+    :param text: the list of aspects to add
     """
-
-    roles = list(role.id for role in context.message.author.roles)  # get role ids
-    player = DiscordUtility.is_role(playerRole, roles)
-    gm = DiscordUtility.is_role(GMRole, roles)
-
-    game_id = get_id(context,player,gm,player_id)
-    if game_id is None:
+    header = gm_player_command_header(context, player_id, text)
+    if header is None:
         return
+    [player, gm, cha, args] = header
 
-    cha = game_object.get_character(game_id)
-    if cha is None:
-        await bot.say("no character")
-        return
+    a = action.lower() # non-case sensitive
 
-    #Type decoding
-    type_l = type.lower()
-    if type_l == "aspect":
-        if player and not gm:
-            cha.add_aspect(player_id) # player only refers to self, so it is an attribute
-        for t in text:
+    if a in ["add", "a"]:
+        for t in args:
             cha.add_aspect(t)
         await bot.say("aspect(s) added")
-    elif type_l == "bar":
-        if player and not gm:
-            cha.add_bar(BarFactory.bar_default(player_id)) # player only refers to self, so it is an attribute
-        for t in text:
-            cha.add_bar(BarFactory.bar_default(t))
-        await bot.say("bar(s) added")
-    elif type_l == "consequence" or type_l == "con":
-        pass
-
-@bot.command(pass_context=True)
-async def c_remove(context, type, player_id, *text):
-    """
-    Handle removing of attributes
-    :param context: context
-    :param type: what are we editing of a character
-    :param player_id: potential mention
-    :param text: what is the text to go with it
-    :return:
-    """
-    roles = list(role.id for role in context.message.author.roles)  # get role ids
-    player = DiscordUtility.is_role(playerRole, roles)
-    gm = DiscordUtility.is_role(GMRole, roles)
-
-    # permission
-    game_id = get_id(context, player, gm, player_id)
-    if game_id is None:
-        return
-
-    cha = game_object.get_character(game_id)
-    if cha is None:
-        await bot.say("no character")
-        return
-
-    #Type decoding
-    type_l = type.lower()
-    if type_l == "aspect":
-        if player and not gm:
-            cha.remove_aspect(player_id) # player only refers to self
-        for t in text:
+    elif a in ["remove","r"]:
+        for t in args:
             cha.remove_aspect(t)
         await bot.say("aspect(s) removed")
-    elif type_l == "bar":
-        if player and not gm:
-            cha.remove_bar(player_id) # player only refers to self
-        for t in text:
-            cha.remove_bar(t)
-        await bot.say("bar(s) removed")
-    elif type_l == "consequence" or type_l == "con":
-        pass
-
 
 @bot.command(pass_context=True)
-async def bar(context, action, bar, box, id=None):
+async def skill(context,action, player_id,*text):
+    """
+    handle addition and removal of skills
+    :param context: context
+    :param action: either [add,a] or [remove,r]
+    :param player_id: optional id for gm use
+    :param text: the list of arguments
+    """
+    header = gm_player_command_header(context,player_id,text)
+    if header is None:
+        return
+    [player, gm, cha, args] = header
+
+    a = action.lower()  # non-case sensitive
+
+    if a in ["add", "a"]:
+        pairs = zip(args[0::2],args[1::2])
+        # each pair goes (name, level)
+        for p in pairs:
+            # TODO check that the order is in pairs
+            cha.add_skill(int(p[1]),p[0])
+        await bot.say("skill(s) added")
+    elif a in ["remove", "r"]:
+        for t in args:
+            cha.remove_skill(t)  # player only refers to self
+        await bot.say("skill(s) removed")
+
+@bot.command(pass_context=True)
+async def bar(context, action, id, *text):
     """
     Do stuff with bars
     :param context: context
-    :param action: spend or s, refresh or r
-    :param bar: the name of the bar
-    :param box: the index of the box (assume array)
+    :param action: one of [spend, s] [refresh,r] [add,a] [remove r]
     :param id: optional name for gm use
+    :param text: list of arguments
     :return:
     """
-    roles = list(role.id for role in context.message.author.roles)  # get role ids
-    player = DiscordUtility.is_role(playerRole, roles)
-    gm = DiscordUtility.is_role(GMRole, roles)
-
-    game_id = get_id(context, player, gm, id)
-    if game_id is None:
+    header = gm_player_command_header(context, id, text)
+    if header is None:
         return
-
-    cha = game_object.get_character(game_id)
-    if cha is None:
-        await bot.say("no character")
-        return
+    [player, gm, cha, args] = header
 
     a = action.lower()
 
     if a in ["s","spend"]:
-        cha.spend_box(bar,int(box))
-        await bot.say("box spent")
-    elif a in ["r","refresh"]:
+        pairs = zip(args[0::2], args[1::2])  # generate pairs
+        # must be in pairs of 2, going box, bar
+        for p in pairs:
+            cha.spend_box(p[0],int(p[1]))
+        await bot.say("box(s) spent")
+    elif a in ["re","refresh"]:
         if gm:  # only gm can refresh a box
-            cha.refresh_box(bar, int(box))
-            await bot.say("box refreshed")
+            pairs = zip(args[::2], args[1::2])  # generate pairs
+            for p in pairs:
+                cha.refresh_box(p[0], int(p[1]))
+            await bot.say("box(s) refreshed")
+    elif a in ["add","a"]:
+        for t in args:
+            cha.add_bar(BarFactory.bar_default(t))
+        await bot.say("box(s) added")
+    elif a in ["remove","r"]:
+        for t in args:
+            cha.remove_bar(t)
+        await bot.say("bar(s) removed")
 
 @bot.command(pass_context=True)
 async def fate(context, action, amount, id=None):
@@ -277,20 +250,12 @@ async def fate(context, action, amount, id=None):
     :param action: spend or s, give or g
     :param amount: amount to spend or fill
     :param id: optional name for gm use
-    :return:
     """
-    roles = list(role.id for role in context.message.author.roles)  # get role ids
-    player = DiscordUtility.is_role(playerRole, roles)
-    gm = DiscordUtility.is_role(GMRole, roles)
-
-    game_id = get_id(context, player, gm, id)
-    if game_id is None:
+    #TODO this code process an argument list unnecessarily
+    header = gm_player_command_header(context, id, ())
+    if header is None:
         return
-
-    cha = game_object.get_character(game_id)
-    if cha is None:
-        await bot.say("no character")
-        return
+    [player, gm, cha, args] = header
 
     a = action.lower()
 
@@ -307,6 +272,34 @@ async def fate(context, action, amount, id=None):
 async def on_message(message):
     await bot.process_commands(message)
 
+def gm_player_command_header(context,id,text):
+    """
+    Sorts out player and gm commands
+    :param context: context of message
+    :param id: optional id entered (may not be id)
+    :param text: the list of arguments as a tuple
+    :return: player : boolean, gm : boolean, character : Character, args : list
+    """
+    roles = list(role.id for role in context.message.author.roles)  # get role ids
+    player = DiscordUtility.is_role(playerRole, roles)
+    gm = DiscordUtility.is_role(GMRole, roles)
+
+    game_id = get_id(context, player, gm, id)
+    if game_id is None:
+        return None # end command
+
+    cha = game_object.get_character(game_id)
+    if cha is None:
+        bot.say("no character")
+        return None # end command
+
+    args = list(text)
+
+    if player and not gm:
+        args.insert(0,id)  # add id
+
+    return [player,gm,cha,args]
+
 
 def get_id(context,player,gm,id):
     """
@@ -318,6 +311,7 @@ def get_id(context,player,gm,id):
     :param id: id argument
     :return: id if possible, otherwise None
     """
+
     if not player and not gm:
         return None
 

@@ -22,7 +22,7 @@ class CharacterAllTest(unittest.TestCase):
         self.assertEqual("jane\n"
                          "Aspects: hiding\n"
                          "Skills: | 1 stealth |\n"
-                         "stress \033[0;32m[1]\033[0m \033[0;32m[2]\033[0m \033[0;32m[3]\033[0m \033[0;32m[4]\033[0m",
+                         "stress [1] [2] [3] [4]",
                          str(self.c), "Did not format correctly")
 
     def test_example_2(self):
@@ -37,9 +37,9 @@ class CharacterAllTest(unittest.TestCase):
         b.add_box(Box(4))
         self.c.add_bar(b)
         self.assertEqual("jane\n"
-                         "Aspects: hiding taken\n"
+                         "Aspects: hiding, taken\n"
                          "Skills: | 1 stealth | 1 heal |\n"
-                         "stress \033[0;32m[1]\033[0m \033[0;32m[2]\033[0m \033[0;32m[3]\033[0m \033[0;32m[4]\033[0m",
+                         "stress [1] [2] [3] [4]",
                          str(self.c), "Did not format correctly")
 
 if __name__ == '__main__':

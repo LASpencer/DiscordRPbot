@@ -41,19 +41,34 @@ can use the additional @user parameter to look at everyones
 create a new character of the name and assign it to you. the @user is optional and only usable by gm.
 This is to allow the gm to help players set up
 
-## c_add <@user> (type) (a1) (a2) (a3)
-type can be of "aspect" "bar" "consequence". @user is only for gm purposes. 
-multiple attributes can be added at once
+## aspect (action) <@user> (args)
+<@user> is only used for gm
+| Action | Short | argument list | desc |
+| ------ | ----- | ------------- | ---- |
+| add	 | a     | (a1) (a2) (a3)  | adds aspect to a character |
+| remove | r     | (a1) (a2) (a3)  | removes aspects from a character |
 
-## c_remove <@user> (type) (a1) (a2) (a3)
-type can be of "aspect" "bar" "consequence". @user is only for gm purposes. 
-multiple attributes can be removed at once
+## skill (action) <@user> (name, level) (name, level)
+<@user> is only used for gm
+| Action | Short | argument list | desc |
+| ------ | ----- | ------------- | ---- |
+| add	 | a     | (skill) (level) (skill) (level)  | adds skill to a character |
+| remove | r     | (skill) (level) (skill) (level)  | removes skills from a character |
 
-## bar (action) (bar) (box) <@user>
-action can be one of spend or refresh. s and r are short forms. The bar is the name while box is the index.
-The @user is for gm only.
+## bar (action) <@user> (args)
+<@user> is only used for gm
+| Action | Short | argument list | desc |
+| ------ | ----- | ------------- | ---- |
+| add	 | a     | (b1) (b2)     | adds bar to a character |
+| remove | r     | (b1) (b2)     | removes bar from a character |
+| spend  | s     | (bar) (box) (bar) (box) | spends a box  |
+| refresh| re    | (bar) (box) (bar) (box) | refreshes a box, only a gm can do so|
+
 ## fate (action) (amount) <@user>
-action can be spend or give. s and g are short forms. Only a player may spend their own points, 
-while a gm can give and spend, but need to specify user
-
+<@user> is only used for gm
+A player may only spend their points, but only a gm can give.
+| Action | Short | desc |
+| ------ | ----- | ---- |
+| spend	 | s     |  adds fate to a character |
+| give   | g     |  removes fate from a character, only a gm can give |
 
