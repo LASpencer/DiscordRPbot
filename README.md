@@ -37,7 +37,7 @@ gives information of a person's character in game. the default @user is the mess
 private messages the number of fate points. A player can only see their own, while a gm 
 can use the additional @user parameter to look at everyones
 
-## c (name) <@user>
+## c <@user> (name) 
 create a new character of the name and assign it to you. the @user is optional and only usable by gm.
 This is to allow the gm to help players set up
 
@@ -57,6 +57,7 @@ This is to allow the gm to help players set up
 | add	 | a     | (skill) (level) (skill) (level)  | adds skill to a character |
 | remove | r     | (skill) (level) (skill) (level)  | removes skills from a character |
 
+
 ## bar (action) <@user> (args)
 <@user> is only used for gm
 
@@ -64,10 +65,20 @@ This is to allow the gm to help players set up
 | ------ | ----- | ------------- | ---- |
 | add	 | a     | (b1) (b2)     | adds bar to a character |
 | remove | r     | (b1) (b2)     | removes bar from a character |
+| spend  | s     | (b1) (b2)     | spends a bar  |
+| refresh| re    | (b1) (b2)     | refreshes a bar, only a gm can do so|
+
+## box (action) <@user> (args)
+<@user> is only used for gm
+
+| Action | Short | argument list | desc |
+| ------ | ----- | ------------- | ---- |
+| add	 | a     | (bar) (size) (bar) (size)  | adds bar to a character at the end |
+| remove | r     | (bar) (index) (bar) (index) | removes bar from a character. Note: *remove bar 1 bar 1* will remove boxes at index 1 and 2|
 | spend  | s     | (bar) (box) (bar) (box) | spends a box  |
 | refresh| re    | (bar) (box) (bar) (box) | refreshes a box, only a gm can do so|
 
-## fate (action) (amount) <@user>
+## fate (action) <@user> (amount) 
 <@user> is only used for gm
 A player may only spend their points, but only a gm can give.
 

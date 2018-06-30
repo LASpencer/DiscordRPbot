@@ -69,6 +69,21 @@ class Character:
         """
         return self.bars.pop(text.lower(), None)
 
+
+    def refresh_bar(self,text):
+        """
+        Delegate to bar.refresh
+        :param text: name of bar
+        """
+        self.bars[text.lower].refresh()
+
+    def spend_bar(self,text):
+        """
+        Delegate to bar.spend
+        :param text: name of bar
+        """
+        self.bars[text.lower].spend()
+
     def spend_box(self, bar, box):
         """
         spend a box of a bar

@@ -14,6 +14,7 @@ import random
 from Game import Game
 import DiscordUtility
 import BarFactory
+from Bar import Box
 
 Client = discord.Client()
 bot = commands.Bot(command_prefix="!")
@@ -44,9 +45,30 @@ async def cookie():
     await bot.say(":cookie:")
 
 @bot.command(pass_context=False)
-async def roll():
+async def roll(*list):
+    """
+    handles rolls on advantages
+    :param list: list of potential numbers
+    """
+    advantages = []
+    for i in list:
+        try:
+            advantages.append(int(i))
+        except ValueError:
+            await bot.say("%s is not a valid integer" % i)
+            return
+
     [d1,d2,d3,d4,t] = DiscordUtility.fudgeRoll()
-    await bot.say("%d + %d + %d + %d = %d" % (d1,d2,d3,d4,t))
+
+    output = "```\nroll  : %d + %d + %d + %d = %d" % (d1,d2,d3,d4,t)
+    output += "\ntotal : %d" % t  # add total to new line
+    for i in advantages:
+        output += " + %d" % i
+        t += i
+    # add total at the end
+    output += " = %d\n```" % t
+
+    await bot.say(output)
 
 """
 ####################################################################
@@ -94,17 +116,31 @@ async def game(context,arg):
         await bot.say("Not GM")
 
 @bot.command(pass_context=True)
-async def c(context,name,id=None):
+async def c(context,a1, a2=None):
+    """
+    make a new character
+    :param context: context
+    :param a1: id, could also be name
+    :param a2: name
+    """
     roles = list(role.id for role in context.message.author.roles)  # get role ids
     player = DiscordUtility.is_role(playerRole, roles)
     gm = DiscordUtility.is_role(GMRole, roles)
 
-    game_id = get_id(context, player, gm, id)
+    game_id = get_id(context, player, gm, a1)
     if game_id is None:
+        await bot.say("no user id")
         return
 
-    game_object.new_character(name,game_id)
-    await bot.say("character added")
+    if gm:
+        game_object.new_character(a2, game_id)
+        await bot.say("character added")
+    elif player:
+        game_object.new_character(a1, game_id)
+        await bot.say("character added")
+    else:
+        await bot.say("no character added")
+
 
 """
 ####################################################################
@@ -136,6 +172,7 @@ async def info_fate(context, id=None):
 
     game_id = get_id(context, player, gm, id)
     if game_id is None:
+        await bot.say("no user id")
         return
 
     cha = game_object.get_character(game_id)
@@ -222,6 +259,43 @@ async def bar(context, action, id, *text):
     a = action.lower()
 
     if a in ["s","spend"]:
+        for t in args:
+            cha.spend_bar(t)
+        await bot.say("bar(s) spent")
+    elif a in ["re","refresh"]:
+        if gm:  # only gm can refresh a bar
+            for t in args:
+                cha.refresh_bar(t)
+            await bot.say("bar(s) refreshed")
+    elif a in ["add","a"]:
+        for t in args:
+            cha.add_bar(BarFactory.bar_default(t))
+        await bot.say("bar(s) added")
+    elif a in ["remove","r"]:
+        for t in args:
+            cha.remove_bar(t)
+        await bot.say("bar(s) removed")
+
+@bot.command(pass_context=True)
+async def box(context, action, id, *text):
+    """
+    Handle box addition, removal
+    for removal, it will do it in order of removal.
+    If you call remove[0] remove[0] it will remove boxes 0 and 1.
+    as 1 shifted into place.
+    :param context: context
+    :param action: one of [remove,r] or [add,a]
+    :param id: optional id for gm
+    :param text: tuple of arguments
+    """
+    header = gm_player_command_header(context, id, text)
+    if header is None:
+        return
+    [player, gm, cha, args] = header
+
+    a = action.lower()
+
+    if a in ["s","spend"]:
         pairs = zip(args[0::2], args[1::2])  # generate pairs
         # must be in pairs of 2, going box, bar
         for p in pairs:
@@ -234,38 +308,75 @@ async def bar(context, action, id, *text):
                 cha.refresh_box(p[0], int(p[1]))
             await bot.say("box(s) refreshed")
     elif a in ["add","a"]:
-        for t in args:
-            cha.add_bar(BarFactory.bar_default(t))
+        pairs = zip(args[0::2], args[1::2])  # generate pairs
+        for p in pairs:
+            bar = cha.get_bar(p[0])
+            if bar is None:
+                continue
+            bar.add_box(Box(int(p[1])))
         await bot.say("box(s) added")
-    elif a in ["remove","r"]:
-        for t in args:
-            cha.remove_bar(t)
-        await bot.say("bar(s) removed")
+    elif a in ["remove", "r"]:
+        pairs = zip(args[0::2], args[1::2])  # generate pairs
+        for p in pairs:
+            bar = cha.get_bar(p[0])
+            if bar is None:
+                continue
+            bar.remove_box(Box(int(p[1])))
+        await bot.say("box(s) removed")
+
 
 @bot.command(pass_context=True)
-async def fate(context, action, amount, id=None):
+async def fate(context, action, id, *args):
     """
     Do stuff with bars
     :param context: context
     :param action: spend or s, give or g
-    :param amount: amount to spend or fill
-    :param id: optional name for gm use
+    :param id : optional id
+    :param args: list of arguments
     """
-    #TODO this code process an argument list unnecessarily
-    header = gm_player_command_header(context, id, ())
+    header = gm_player_command_header(context, id, args)
     if header is None:
         return
     [player, gm, cha, args] = header
 
     a = action.lower()
 
+    # need to add check such that args[0] is positive
+
+
+
     if a in ["s","spend"]:
-        cha.change_fate(-int(amount))
-        await bot.say("%s fate spent" % amount)
+        amount = fate_positive(args[0])
+        if amount is not None:
+            cha.change_fate(-amount)
+            await bot.say("%s fate spent" % amount)
     elif a in ["g","give"]:
         if gm:  # only gm can refresh a box
-            cha.change_fate(int(amount))
-            await bot.say("%s fate given" % amount)
+            amount = fate_positive(args[0])
+            if amount is not None:
+                cha.change_fate(amount)
+                await bot.say("%s fate given" % amount)
+    if a in ["i","info"]:
+        await bot.send_message(context.message.author, "%s has %d fate points" % (cha.get_name(), cha.get_fate()))
+
+def fate_positive(num):
+    """
+    check a number is an non-negative integer.
+    :param num: string to be check
+    :return: None if invalid, integer if valid
+    """
+    try:
+        amount = int(num)
+    except ValueError:
+        bot.say("not valid amount")
+        return None
+
+    if amount <= 0:
+        bot.say("cannot be 0 or negative")
+        return None
+
+    return amount
+
 
 
 @bot.event
