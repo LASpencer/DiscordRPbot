@@ -73,16 +73,11 @@ class CharacterBarTest(unittest.TestCase):
         self.assertTrue(self.bar[4].used, "Did not refresh the correct box")
 
     def test_spend_non_case_sensitive(self):
-        self.c.spend_bar("test")
-        self.assertTrue(self.bar[1].used, "Did not spend the correct box")
-        self.assertFalse(self.bar[2].used, "Did not spend the correct box")
-        self.assertFalse(self.bar[3].used, "Did not spend the correct box")
-        self.assertFalse(self.bar[4].used, "Did not spend the correct box")
-        self.c.spend_box("TEST", 2)
+        self.c.spend_bar("TEST")
         self.assertTrue(self.bar[1].used, "Did not spend the correct box")
         self.assertTrue(self.bar[2].used, "Did not spend the correct box")
-        self.assertFalse(self.bar[3].used, "Did not spend the correct box")
-        self.assertFalse(self.bar[4].used, "Did not spend the correct box")
+        self.assertTrue(self.bar[3].used, "Did not spend the correct box")
+        self.assertTrue(self.bar[4].used, "Did not spend the correct box")
 
     def test_refresh_bar(self):
         self.c.refresh_bar("test")

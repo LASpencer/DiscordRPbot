@@ -8,7 +8,8 @@ Date : 21/06/2018
 from Bar import *
 from Aspect import *
 from Skill import *
-
+import BarFactory
+from Consequence import *
 """
 Represents a Character in the Fate SRD
 """
@@ -22,6 +23,12 @@ class Character:
         self.skills = SkillContainer()
         self.fate = 0
         self.refresh_rate = refresh_rate
+        self.consequence_bar = BarFactory.bar_consequence("consequence")
+        self.consequences = []
+        self.add_bar(BarFactory.bar_default("physical"))
+        self.add_bar(BarFactory.bar_default("mental"))
+
+
 
     def get_fate(self):
         return self.fate
@@ -29,16 +36,28 @@ class Character:
     def change_fate(self,change):
         """
         Change the fate points
-        TODO negotiate maximum, minimum
+        the fate points is always greater than 0
         :param change: the amount to change by
+        :return: True if changed, false otherwise
         """
-        self.fate += change
+        temp = self.fate + change
+        if temp < 0:
+            return False
+        self.fate = temp
+        return True
 
     def refresh_fate(self):
         """
         Returns fate to a minimum, otherwise doesn't change
         """
         self.fate = self.fate if self.fate >= self.refresh_rate else self.refresh_rate
+
+    def set_refresh_fate(self,rate):
+        """
+        Sets the refresh rate
+        :param rate:
+        """
+        self.refresh_rate = rate
 
     def get_bar(self, name):
         '''
@@ -75,14 +94,14 @@ class Character:
         Delegate to bar.refresh
         :param text: name of bar
         """
-        self.bars[text.lower].refresh()
+        self.bars[text.lower()].refresh()
 
     def spend_bar(self,text):
         """
         Delegate to bar.spend
         :param text: name of bar
         """
-        self.bars[text.lower].spend()
+        self.bars[text.lower()].spend()
 
     def spend_box(self, bar, box):
         """
@@ -168,5 +187,67 @@ class Character:
             output += "\n"
             output += str(self.bars[bar])
 
+        output += "\n"
+        output += str(self.consequence_bar)
         return output
+
+    def add_consequence(self,modifier):
+        """
+        Adds a consequence on a modifier
+        :param modifier: multiple of 2
+        :return: True if added, false otherwise
+        :raise ValueError: modifier not divisible by 2
+        """
+        # check that modifier is a multiple of 2
+        if modifier % 2 != 0:
+            raise ValueError("modifier not divisible by 2")
+
+        index = modifier // 2
+        # check bar is spent or not
+        if self.consequence_bar[index].is_spent():
+            return False
+
+        self.consequences.append(Consequence(modifier))
+        self.consequence_bar[index].spend()
+
+    def remove_consequence(self,modifier):
+        """
+        remove a consequence on a modifier
+        :param modifier: multiple of 2
+        :return: True if removed, false otherwise
+        :raise ValueError: modifier not divisible by 2
+        """
+        # check that modifier is a multiple of 2
+        if modifier % 2 != 0:
+            raise ValueError("modifier not divisible by 2")
+
+        index = modifier //2
+        # check bar is spent or not
+        if self.consequence_bar[index].is_spent():
+            return False
+
+        for cons in self.consequences:
+            if cons.get_modifier() == modifier:
+                self.consequences.remove(cons)
+                break
+        self.consequence_bar[index].refresh()
+
+    def get_consequence(self,modifier):
+        """
+        returns the consequence at a modifier
+        :param modifier: modifier divisible by 2
+        :return: consequence if found, None otherwise
+        :raise ValueError: modifier not divisible by 2
+        """
+        if modifier % 2 != 0:
+            raise ValueError("modifier not divisible by 2")
+
+        index = modifier //2
+        # check bar is spent or not
+        if not self.consequence_bar[index].is_spent():
+            return None # no consequence
+
+        for cons in self.consequences:
+            if cons.get_modifier() == modifier:
+                return cons
 

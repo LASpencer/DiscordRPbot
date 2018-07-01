@@ -76,16 +76,23 @@ class Box:
         self.used = False
 
     def spend(self):
-        '''
-        toggle a box as used
-        '''
+        """
+        toggle box as used
+        """
         self.used = True
 
     def refresh(self):
-        '''
-        Toggle a box as un-used
-        '''
+        """
+        toggle box as unused
+        """
         self.used = False
+
+    def is_spent(self):
+        """
+        query method
+        :return: true if used, false if not
+        """
+        return self.used
 
     def __str__(self):
         if self.used:

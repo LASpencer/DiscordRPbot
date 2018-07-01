@@ -8,6 +8,9 @@ class AspectContainerTest(unittest.TestCase):
     def setUp(self):
         self.container = AspectContainer()
 
+    def test_empty(self):
+        self.assertEqual("", str(self.container), "Aspect not properly added")
+
     def test_add_get(self):
         self.assertTrue(self.container.add("On Fire"),"successful add not true")
         self.assertEqual("on fire",str(self.container),"Aspect not properly added")

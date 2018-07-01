@@ -35,3 +35,11 @@ class Game:
             return self.characters[id]
         except KeyError:
             return None
+
+    def refresh(self):
+        """
+        Refresh game state.
+        """
+        for cha in self.characters.items():
+            assert isinstance(cha,Character)
+            cha.refresh_fate()

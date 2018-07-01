@@ -78,6 +78,19 @@ This is to allow the gm to help players set up
 | spend  | s     | (bar) (box) (bar) (box) | spends a box  |
 | refresh| re    | (bar) (box) (bar) (box) | refreshes a box, only a gm can do so|
 
+## consequence (action) (modifier) <@user> (args)
+it can also be added as cons (shortcut)
+<@user> is only used for gm
+
+| Action | Short | argument list | desc |
+| ------ | ----- | ------------- | ---- |
+| add	 | a     | (name) optional | adds a consequence to a modifier|
+| remove | r     | none          | removes a consequence, gm only|
+| info   | i     | none          | information about a consequence|
+| aspectadd | aa | (a1) (a2)     | add aspects to consequence|
+| aspectremove|ar| (a1) (a2)     | remove aspects of consequence, gm only|
+| text   | t     | (a1) only takes first | sets flavour set of consequence|
+
 ## fate (action) <@user> (amount) 
 <@user> is only used for gm
 A player may only spend their points, but only a gm can give.

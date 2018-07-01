@@ -77,26 +77,63 @@ Discord Set up
 """
 @bot.command(pass_context=True)
 async def assign(context,role_arg,id):
-    if context.message.server.owner == context.message.author:
-        role = role_arg.lower() # non-case-sensitive
-        if role == "player":
+
+    if context.message.server.owner != context.message.author:
+        await not_owner_message()
+        return
+    role = role_arg.lower() # non-case-sensitive
+    if role in ["p", "player", "gm", "gamemaster"]:
+        role_id = DiscordUtility.valid_role(id)
+        if role_id is None:
+            await bot.say("not a valid role")
+            return
+
+        if role in ["p","player"]:
             global playerRole
-            role_id = DiscordUtility.valid_role(id)
-            if role_id is not None:
-                playerRole = role_id
-                await bot.say("player role set")
-            else:
-                await bot.say("not a valid role")
-        elif role == "gm":
+            playerRole = role_id
+            await bot.say("player role set")
+        else:
             global GMRole
-            role_id = DiscordUtility.valid_role(id)
-            if role_id is not None:
-                GMRole = role_id
-                await bot.say("GM role set")
-            else:
-                await bot.say("not a valid role")
+            GMRole = role_id
+            await bot.say("GM role set")
     else:
-        await bot.say("Not Owner")
+        await bot.say("assign role of(p)layer or gamemaster(gm)")
+
+
+@bot.command(pass_context=True)
+async def load(context,action,*args):
+    if context.message.server.owner != context.message.author:
+        await not_owner_message()
+        return
+    a = action.lower()
+
+    if a in ["roles", "r"]:
+        with open("Game/roles.txt","r") as text:
+            roles = text.read().split("\n")
+            global playerRole
+            global GMRole
+            playerRole = roles[0]
+            GMRole = roles[1]
+        await bot.say("roles loaded")
+
+
+@bot.command(pass_context=True)
+async def save(context,action, *args):
+    if context.message.server.owner != context.message.author:
+        await not_owner_message()
+        return
+    a = action.lower()
+
+    if a in ["roles","r"]:
+        with open("Game/roles.txt","w") as roles:
+            global playerRole
+            global GMRole
+            roles.write(playerRole + "\n")
+            roles.write(GMRole)
+        await bot.say("roles saved")
+
+
+
 """
 ####################################################################
 Game Set up
@@ -109,11 +146,12 @@ async def game(context,arg):
         if arg == "start":
             await bot.say("Start Game")
         if arg == "refresh":
+            game_object.refresh()
             await bot.say("refresh Game")
         if arg == "details":
             await bot.say(str(game_object))
     else:
-        await bot.say("Not GM")
+        await not_gm_message()
 
 @bot.command(pass_context=True)
 async def c(context,a1, a2=None):
@@ -127,7 +165,7 @@ async def c(context,a1, a2=None):
     player = DiscordUtility.is_role(playerRole, roles)
     gm = DiscordUtility.is_role(GMRole, roles)
 
-    game_id = get_id(context, player, gm, a1)
+    game_id = await get_id(context, player, gm, a1)
     if game_id is None:
         await bot.say("no user id")
         return
@@ -138,7 +176,7 @@ async def c(context,a1, a2=None):
     elif player:
         game_object.new_character(a1, game_id)
         await bot.say("character added")
-    else:
+    else: # should never be reached
         await bot.say("no character added")
 
 
@@ -164,24 +202,6 @@ async def info(context, id=None):
     else:
         await bot.say(str(cha))
 
-@bot.command(pass_context=True)
-async def info_fate(context, id=None):
-    roles = list(role.id for role in context.message.author.roles)  # get role ids
-    player = DiscordUtility.is_role(playerRole, roles)
-    gm = DiscordUtility.is_role(GMRole, roles)
-
-    game_id = get_id(context, player, gm, id)
-    if game_id is None:
-        await bot.say("no user id")
-        return
-
-    cha = game_object.get_character(game_id)
-    if cha is None:
-        await bot.say("no character")
-        return
-
-    await bot.send_message(context.message.author,"%s has %d fate points" % (cha.get_name(),cha.get_fate()))
-
 """
 ####################################################################
 Game Play
@@ -197,7 +217,7 @@ async def aspect(context, action, player_id, *text):
     :param player_id: optional player id, for gm use only
     :param text: the list of aspects to add
     """
-    header = gm_player_command_header(context, player_id, text)
+    header = await gm_player_command_header(context, player_id, text)
     if header is None:
         return
     [player, gm, cha, args] = header
@@ -222,7 +242,7 @@ async def skill(context,action, player_id,*text):
     :param player_id: optional id for gm use
     :param text: the list of arguments
     """
-    header = gm_player_command_header(context,player_id,text)
+    header = await gm_player_command_header(context,player_id,text)
     if header is None:
         return
     [player, gm, cha, args] = header
@@ -251,7 +271,7 @@ async def bar(context, action, id, *text):
     :param text: list of arguments
     :return:
     """
-    header = gm_player_command_header(context, id, text)
+    header = await gm_player_command_header(context, id, text)
     if header is None:
         return
     [player, gm, cha, args] = header
@@ -267,6 +287,8 @@ async def bar(context, action, id, *text):
             for t in args:
                 cha.refresh_bar(t)
             await bot.say("bar(s) refreshed")
+        else:
+            await not_gm_message()
     elif a in ["add","a"]:
         for t in args:
             cha.add_bar(BarFactory.bar_default(t))
@@ -288,7 +310,7 @@ async def box(context, action, id, *text):
     :param id: optional id for gm
     :param text: tuple of arguments
     """
-    header = gm_player_command_header(context, id, text)
+    header = await gm_player_command_header(context, id, text)
     if header is None:
         return
     [player, gm, cha, args] = header
@@ -307,6 +329,8 @@ async def box(context, action, id, *text):
             for p in pairs:
                 cha.refresh_box(p[0], int(p[1]))
             await bot.say("box(s) refreshed")
+        else:
+            await not_gm_message()
     elif a in ["add","a"]:
         pairs = zip(args[0::2], args[1::2])  # generate pairs
         for p in pairs:
@@ -324,9 +348,68 @@ async def box(context, action, id, *text):
             bar.remove_box(Box(int(p[1])))
         await bot.say("box(s) removed")
 
+@bot.command(pass_context=True)
+async def consequence(context, action, modifier, id=None, *text):
+    await consequence_code(context,action,modifier,id,text)
+
+@bot.command(pass_context=True) # shortcut for consequence
+async def cons(context, action, modifier, id=None, *text):
+    await consequence_code(context,action,modifier,id,text)
+
+
+async def consequence_code(context, action, modifier, id=None, *text):
+    """
+    Do stuff with bars
+    :param context: context
+    :param action: one of [spend, s] [refresh,r] [add,a] [remove r]
+    :param id: optional name for gm use
+    :param modifier: the consequence we are affecting
+    :param text: list of arguments
+    :return:
+    """
+    header = await gm_player_command_header(context, id, text)
+    if header is None:
+        return
+    [player, gm, cha, args] = header
+
+    m = await positive_num(modifier)
+
+    a = action.lower()
+
+    if a in ["add","a"]:
+        cha.add_consequence(m)
+        await bot.say("consequence added")
+    elif a in ["remove","r"]:
+        if gm:
+            cha.remove_consequence(m)
+            await bot.say("consequence removed")
+        else:
+            await not_gm_message()
+    elif a in ["info","i"]:
+        cons = cha.get_consequence(m)
+        await bot.say(str(cons))
+    elif a in ["text","t"]:
+        cons = cha.get_consequence(m)
+        cons.set_text(args[0]) # take only the first argument
+        await bot.say("consequence text changed")
+    elif a in ["aa","aspectadd"]:
+        cons = cha.get_consequence(m)
+        for t in args:
+            cons.add_aspect(t)
+        await bot.say("consequence aspect(s) added")
+    elif a in ["ar","aspectremove"]:
+        if gm:
+            cons = cha.get_consequence(m)
+            for t in args:
+                cons.remove_aspect(t)
+            await bot.say("consequence aspect(s) removed")
+        else:
+            await not_gm_message()
+
+
 
 @bot.command(pass_context=True)
-async def fate(context, action, id, *args):
+async def fate(context, action, id=None, *args):
     """
     Do stuff with bars
     :param context: context
@@ -334,32 +417,41 @@ async def fate(context, action, id, *args):
     :param id : optional id
     :param args: list of arguments
     """
-    header = gm_player_command_header(context, id, args)
+    header = await gm_player_command_header(context, id, args)
     if header is None:
         return
     [player, gm, cha, args] = header
 
     a = action.lower()
 
-    # need to add check such that args[0] is positive
-
-
-
     if a in ["s","spend"]:
-        amount = fate_positive(args[0])
-        if amount is not None:
-            cha.change_fate(-amount)
+        amount = await positive_num(args[0])
+        if amount is not None and cha.change_fate(-amount):
             await bot.say("%s fate spent" % amount)
-    elif a in ["g","give"]:
-        if gm:  # only gm can refresh a box
-            amount = fate_positive(args[0])
-            if amount is not None:
-                cha.change_fate(amount)
+        else:
+            await bot.say("not enough fate points")
+    elif a in ["g", "give"]:
+        if gm:
+            amount = await positive_num(args[0])
+            if amount is not None and cha.change_fate(amount):
                 await bot.say("%s fate given" % amount)
-    if a in ["i","info"]:
+            else:
+                await bot.say("exceed maximum fate points")
+        else:
+            await not_gm_message()
+    elif a in ["i","info"]:
         await bot.send_message(context.message.author, "%s has %d fate points" % (cha.get_name(), cha.get_fate()))
+    elif a in ["rset","refreshSet"]:
+        if gm: # GM only action
+            amount = await positive_num(args[0])
+            cha.set_refresh_fate(amount)
+            await bot.say("character refresh set to %d" % amount)
+        else:
+            await not_gm_message()
 
-def fate_positive(num):
+
+
+async def positive_num(num):
     """
     check a number is an non-negative integer.
     :param num: string to be check
@@ -368,22 +460,20 @@ def fate_positive(num):
     try:
         amount = int(num)
     except ValueError:
-        bot.say("not valid amount")
+        await bot.say("not valid amount")
         return None
 
     if amount <= 0:
-        bot.say("cannot be 0 or negative")
+        await bot.say("cannot be 0 or negative")
         return None
 
     return amount
-
-
 
 @bot.event
 async def on_message(message):
     await bot.process_commands(message)
 
-def gm_player_command_header(context,id,text):
+async def gm_player_command_header(context,id,text):
     """
     Sorts out player and gm commands
     :param context: context of message
@@ -395,13 +485,13 @@ def gm_player_command_header(context,id,text):
     player = DiscordUtility.is_role(playerRole, roles)
     gm = DiscordUtility.is_role(GMRole, roles)
 
-    game_id = get_id(context, player, gm, id)
+    game_id = await get_id(context, player, gm, id)
     if game_id is None:
         return None # end command
 
     cha = game_object.get_character(game_id)
     if cha is None:
-        bot.say("no character")
+        await bot.say("no character")
         return None # end command
 
     args = list(text)
@@ -412,7 +502,7 @@ def gm_player_command_header(context,id,text):
     return [player,gm,cha,args]
 
 
-def get_id(context,player,gm,id):
+async def get_id(context,player,gm,id):
     """
     short hand of some code.
     a gm MUST specify an ID, while a player does not and cannot
@@ -429,14 +519,24 @@ def get_id(context,player,gm,id):
     if gm:
         game_id = DiscordUtility.valid_id(id)
         if game_id is None:
-            bot.say("no player targeted")
+            await bot.say("no player targeted")
             return None
     else:
         game_id = context.message.author.id
     return game_id
 
+async def not_gm_message():
+    """
+    sends a not gm message, used to reduce connascence
+    """
+    await bot.say("not gm")
 
-
+async def not_owner_message():
+    """
+    send a not owner message, used to reduce connascence
+    :return:
+    """
+    await bot.say("not owner")
 """
 Read token from file, which is git-ignored to prevent stolen bot
 file should just have token in it.

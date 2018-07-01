@@ -27,5 +27,9 @@ class CharacterFateTest(unittest.TestCase):
         self.c.refresh_fate()
         self.assertEqual(10,self.c.get_fate(), "did not keep 10 fate")
 
+    def test_negative(self):
+        self.assertFalse(self.c.change_fate(-10),"invalid fate value")
+        self.assertEqual(0,self.c.get_fate(), "did not retain fate value on invalid")
+
 if __name__ == '__main__':
     unittest.main()

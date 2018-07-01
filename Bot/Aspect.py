@@ -14,7 +14,6 @@ class AspectContainer:
         self.aspects = []
 
     def __str__(self):
-        #TODO make spaces between each aspect
         output = ""
         for aspect in self.aspects:
             output += str(aspect) + ", "
