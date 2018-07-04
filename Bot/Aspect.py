@@ -41,6 +41,10 @@ class AspectContainer:
         assert isinstance(index,int), "must be integer for iterable"
         return self.aspects[index]
 
+
+    def __iter__(self):
+        return self.aspects.__iter__()
+
     def remove(self,text):
         """
         remove an aspect
@@ -57,6 +61,7 @@ class AspectContainer:
         return None
 
 
+
 class Aspect:
     """
     A descriptor of a character
@@ -67,5 +72,8 @@ class Aspect:
 
     def __str__(self):
         return self.text
+
+
+
 
 

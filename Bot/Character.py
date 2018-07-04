@@ -14,7 +14,6 @@ from Consequence import *
 Represents a Character in the Fate SRD
 """
 
-
 class Character:
     def __init__(self,name, refresh_rate=3):
         self.name = name
@@ -23,12 +22,8 @@ class Character:
         self.skills = SkillContainer()
         self.fate = 0
         self.refresh_rate = refresh_rate
-        self.consequence_bar = BarFactory.bar_consequence("consequence")
+        self.consequence_bar = Bar("consequence")
         self.consequences = []
-        self.add_bar(BarFactory.bar_default("physical"))
-        self.add_bar(BarFactory.bar_default("mental"))
-
-
 
     def get_fate(self):
         return self.fate
@@ -204,11 +199,11 @@ class Character:
 
         index = modifier // 2
         # check bar is spent or not
-        if self.consequence_bar[index].is_spent():
+        if self.consequence_bar[index-1].is_spent():
             return False
 
         self.consequences.append(Consequence(modifier))
-        self.consequence_bar[index].spend()
+        self.consequence_bar[index-1].spend()
 
     def remove_consequence(self,modifier):
         """
@@ -223,14 +218,14 @@ class Character:
 
         index = modifier //2
         # check bar is spent or not
-        if self.consequence_bar[index].is_spent():
+        if self.consequence_bar[index-1].is_spent():
             return False
 
         for cons in self.consequences:
             if cons.get_modifier() == modifier:
                 self.consequences.remove(cons)
                 break
-        self.consequence_bar[index].refresh()
+        self.consequence_bar[index-1].refresh()
 
     def get_consequence(self,modifier):
         """
@@ -244,10 +239,9 @@ class Character:
 
         index = modifier //2
         # check bar is spent or not
-        if not self.consequence_bar[index].is_spent():
+        if not self.consequence_bar[index-1].is_spent():
             return None # no consequence
 
         for cons in self.consequences:
             if cons.get_modifier() == modifier:
                 return cons
-

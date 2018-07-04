@@ -33,3 +33,4 @@ class Consequence:
         output += "aspects: %s" % str(self.aspects)
         output += "\ntext: %s" % self.text
         return output
+

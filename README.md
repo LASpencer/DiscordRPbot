@@ -24,33 +24,48 @@ sends a cookie emote
 does a fudge roll, 4 dice of 3 sides, and adds them all up
 
 ## game {start|refresh|details}
-starts a game, resets the game, or provides details. This is for gm use ONlY
+starts a game, resets the game, or provides details. This is for gm use only
+
+## load (type)
+loads to a file
+| Action | Short | argument list | desc |
+| ------ | ----- | ------------- | ---- |
+| roles  | r     | None          | loads the gm and player role from roles.txt |
+
+## save (type)
+saves to a file
+| Action | Short | argument list | desc |
+| ------ | ----- | ------------- | ---- |
+| roles  | r     | None          | saves the gm and player role to roles.txt |
 
 ## assign (role) <@role>
 role can be one of "player" or "gm", and the @role requires a role to be mentioned
 This will set the permissions of the game
 
 ## info <@user>
-gives information of a person's character in game. the default @user is the message sender
+gives information of a person's character in game. the default @user is the message sender.
+A character can be addressed by their name, or if it is a player, by a mention.
 
-## info_fate <@user>
-private messages the number of fate points. A player can only see their own, while a gm 
-can use the additional @user parameter to look at everyones
-
-## c <@user> (name) 
+## character <@user> (name)
+short form is "!c <@user> (name)"
 create a new character of the name and assign it to you. the @user is optional and only usable by gm.
 This is to allow the gm to help players set up
 
-## aspect (action) <@user> (args)
-<@user> is only used for gm
+## object (name)
+short form is "!o (name)"
+only usable by gm
+Creates a new game character.
+
+## aspect (action) <name> (args)
+<name> is only used for gm. it can be a mention, or name of character
 
 | Action | Short | argument list | desc |
 | ------ | ----- | ------------- | ---- |
 | add	 | a     | (a1) (a2) (a3)  | adds aspect to a character |
 | remove | r     | (a1) (a2) (a3)  | removes aspects from a character |
 
-## skill (action) <@user> (name, level) (name, level)
-<@user> is only used for gm
+## skill (action) <name> (name, level) (name, level)
+<name> is only used for gm. it can be a mention, or name of character
 
 | Action | Short | argument list | desc |
 | ------ | ----- | ------------- | ---- |
@@ -58,8 +73,8 @@ This is to allow the gm to help players set up
 | remove | r     | (skill) (level) (skill) (level)  | removes skills from a character |
 
 
-## bar (action) <@user> (args)
-<@user> is only used for gm
+## bar (action) <name> (args)
+<name> is only used for gm. it can be a mention, or name of character
 
 | Action | Short | argument list | desc |
 | ------ | ----- | ------------- | ---- |
@@ -68,8 +83,8 @@ This is to allow the gm to help players set up
 | spend  | s     | (b1) (b2)     | spends a bar  |
 | refresh| re    | (b1) (b2)     | refreshes a bar, only a gm can do so|
 
-## box (action) <@user> (args)
-<@user> is only used for gm
+## box (action) <name> (args)
+<name> is only used for gm. it can be a mention, or name of character
 
 | Action | Short | argument list | desc |
 | ------ | ----- | ------------- | ---- |
@@ -78,9 +93,9 @@ This is to allow the gm to help players set up
 | spend  | s     | (bar) (box) (bar) (box) | spends a box  |
 | refresh| re    | (bar) (box) (bar) (box) | refreshes a box, only a gm can do so|
 
-## consequence (action) (modifier) <@user> (args)
+## consequence (action) (modifier) <name> (args)
 it can also be added as cons (shortcut)
-<@user> is only used for gm
+<name> is only used for gm. it can be a mention, or name of character
 
 | Action | Short | argument list | desc |
 | ------ | ----- | ------------- | ---- |
@@ -91,8 +106,8 @@ it can also be added as cons (shortcut)
 | aspectremove|ar| (a1) (a2)     | remove aspects of consequence, gm only|
 | text   | t     | (a1) only takes first | sets flavour set of consequence|
 
-## fate (action) <@user> (amount) 
-<@user> is only used for gm
+## fate (action) <name> (amount) 
+<name> is only used for gm. it can be a mention, or name of character
 A player may only spend their points, but only a gm can give.
 
 | Action | Short | desc |

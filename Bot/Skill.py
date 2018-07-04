@@ -72,6 +72,9 @@ class SkillContainer:
 
         return output
 
+    def __iter__(self):
+        return self.skills.__iter__()
+
 
 class Skill:
     """

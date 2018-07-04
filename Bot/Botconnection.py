@@ -154,7 +154,14 @@ async def game(context,arg):
         await not_gm_message()
 
 @bot.command(pass_context=True)
-async def c(context,a1, a2=None):
+async def c(context, a1, a2=None):
+    await new_character(context,a1,a2)
+
+@bot.command(pass_context=True)
+async def character(context,a1,a2=None):
+    await new_character(context,a1,a2)
+
+async def new_character(context,a1, a2=None):
     """
     make a new character
     :param context: context
@@ -165,20 +172,49 @@ async def c(context,a1, a2=None):
     player = DiscordUtility.is_role(playerRole, roles)
     gm = DiscordUtility.is_role(GMRole, roles)
 
-    game_id = await get_id(context, player, gm, a1)
-    if game_id is None:
-        await bot.say("no user id")
-        return
+    if not player and not gm:
+        return None
 
     if gm:
-        game_object.new_character(a2, game_id)
-        await bot.say("character added")
-    elif player:
-        game_object.new_character(a1, game_id)
-        await bot.say("character added")
-    else: # should never be reached
-        await bot.say("no character added")
+        game_id = DiscordUtility.valid_id(a1)
+        if game_id is None: # not a valid mention, test for name
+            await bot.say("no user targeted")
+            return
+    else:
+        game_id = context.message.author.id
 
+    if gm:
+        name = a2
+    else:
+        name = a1
+
+    if game_object.player_link_character(name, game_id):
+        await bot.say("character linked")
+    else:
+        await bot.say("character added")
+
+@bot.command(pass_context=True)
+async def o(context, *names):
+    await new_object(context,names)
+
+@bot.command(pass_context=True)
+async def object(context,*names):
+    await new_object(context,names)
+
+async def new_object(context,names):
+    """
+    make a new character
+    :param context: context
+    :param name: tuples
+    """
+    roles = list(role.id for role in context.message.author.roles)  # get role ids
+    gm = DiscordUtility.is_role(GMRole, roles)
+    if gm:
+        for name in names:
+            game_object.new_character(name)
+        await bot.say("character added")
+    else:
+        await not_gm_message()
 
 """
 ####################################################################
@@ -186,17 +222,21 @@ Game Utility
 ####################################################################
 """
 @bot.command(pass_context=True)
-async def info(context, id=None):
+async def info(context, arg=None):
+    """
+    Gets information of a character
+    :param context: context
+    :param arg: can be an id, or name
+    """
 
-    if id is None:
-        game_id = context.message.author.id
+    if arg is None:
+        name = context.message.author.id
     else:
-        game_id = DiscordUtility.valid_id(id)
-        if game_id is None:
-            await bot.say("no player targeted")
-            return
+        name = DiscordUtility.valid_id(arg)
+        if name is None:  # not a valid mention, test for name
+            name = arg.lower()
 
-    cha = game_object.get_character(game_id)
+    cha = game_object.get_character(name)
     if cha is None:
         await bot.say("no character")
     else:
@@ -356,10 +396,9 @@ async def consequence(context, action, modifier, id=None, *text):
 async def cons(context, action, modifier, id=None, *text):
     await consequence_code(context,action,modifier,id,text)
 
-
 async def consequence_code(context, action, modifier, id=None, *text):
     """
-    Do stuff with bars
+    Do stuff with barsa
     :param context: context
     :param action: one of [spend, s] [refresh,r] [add,a] [remove r]
     :param id: optional name for gm use
@@ -485,13 +524,22 @@ async def gm_player_command_header(context,id,text):
     player = DiscordUtility.is_role(playerRole, roles)
     gm = DiscordUtility.is_role(GMRole, roles)
 
-    game_id = await get_id(context, player, gm, id)
+    if not player and not gm:
+        return None
+
+    if gm:
+        game_id = DiscordUtility.valid_id(id)
+        if game_id is None: # not a valid mention, test for name
+            game_id = id.lower()
+    else:
+        game_id = context.message.author.id
+
     if game_id is None:
         return None # end command
 
     cha = game_object.get_character(game_id)
     if cha is None:
-        await bot.say("no character")
+        await bot.say("no character targeted")
         return None # end command
 
     args = list(text)
@@ -501,29 +549,6 @@ async def gm_player_command_header(context,id,text):
 
     return [player,gm,cha,args]
 
-
-async def get_id(context,player,gm,id):
-    """
-    short hand of some code.
-    a gm MUST specify an ID, while a player does not and cannot
-    :param context: the context of the message
-    :param player: player boolean
-    :param gm: gm boolean
-    :param id: id argument
-    :return: id if possible, otherwise None
-    """
-
-    if not player and not gm:
-        return None
-
-    if gm:
-        game_id = DiscordUtility.valid_id(id)
-        if game_id is None:
-            await bot.say("no player targeted")
-            return None
-    else:
-        game_id = context.message.author.id
-    return game_id
 
 async def not_gm_message():
     """
